@@ -1,0 +1,8 @@
+![Dashboard](https://github.com/user-attachments/assets/7f7c1738-7974-46e9-9f23-721d329845b1)
+![Add Customer](https://github.com/user-attachments/assets/cd0e76a7-8c6d-4958-8f9f-12468060f3ee)
+![Customer Details](https://github.com/user-attachments/assets/97650262-ba63-4227-a6de-7f881656d77d)
+![Checkout Customer](https://github.com/user-attachments/assets/73140201-c2bb-4081-822f-bea62a2203b5)
+![Add Room](https://github.com/user-attachments/assets/a09ad303-d269-49d8-b881-70a3505a2a9e)
+![Room Details](https://github.com/user-attachments/assets/11afa23e-f202-42bb-ba54-275ecb3ea550)
+![Add Employee](https://github.com/user-attachments/assets/fb9b9f67-1660-41ab-bb69-22029931cd5b)
+![Employee Details](https://github.com/user-attachments/assets/dbcab42a-af21-4de4-b8fa-1396052491d5)
