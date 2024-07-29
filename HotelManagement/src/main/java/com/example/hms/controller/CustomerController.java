@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = "http://localhost:3002")
+@CrossOrigin(origins = "*")//http://localhost:3002
 public class CustomerController {
     @Autowired
     private final CustomerService customerService;

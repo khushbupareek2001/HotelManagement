@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
-@CrossOrigin(origins = "http://localhost:3002")
+@CrossOrigin(origins = "*")//http://localhost:3002
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -31,6 +31,10 @@ public class EmployeeController {
         return employeeService.getAllEmployees();
     }
 
+    @PutMapping("/{id}")
+    public Employee updateEmployee(@PathVariable Long id, @Valid @RequestBody Employee employee) {
+        return employeeService.updateEmployee(id, employee);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {

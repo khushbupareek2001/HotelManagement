@@ -9,7 +9,8 @@ import com.example.hms.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -26,22 +27,26 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer addCustomer(Customer customer) {
-        customer.setCheckInTime(LocalDateTime.now());
+        customer.setCheckInTime(LocalDate.now());
         customer.setCheckedOut(false);
 
         Room room = roomRepository.findByRoomNumber(customer.getAllocatedRoomNumber());
         if (room != null && room.getAvailability() == RoomEnums.Availability.AVAILABLE) {
             room.setAvailability(RoomEnums.Availability.OCCUPIED);
+            customer.setBedType(room.getBedType());
+            customer.setRoomRate(room.getPrice());
+
             roomRepository.save(room);
         } else {
             throw new IllegalStateException("Room is not available");
         }
+        calculateAdditionalFields(customer);
         return customerRepository.save(customer);
     }
 
     @Override
     public List<Room> getAvailableRooms() {
-        return roomRepository.findByAvailability("available");
+        return roomRepository.findByAvailability(RoomEnums.Availability.AVAILABLE);
     }
 
     @Override
@@ -66,14 +71,16 @@ public class CustomerServiceImpl implements CustomerService {
         }
         if (newRoom != null && newRoom.getAvailability() == RoomEnums.Availability.AVAILABLE) {
             newRoom.setAvailability(RoomEnums.Availability.OCCUPIED);
-            roomRepository.save(newRoom);
             customer.setAllocatedRoomNumber(roomNumber);
+            customer.setBedType(newRoom.getBedType());
+            customer.setRoomRate(newRoom.getPrice());
+            roomRepository.save(newRoom);
         } else {
             throw new IllegalStateException("New room is not available");
         }
+        calculateAdditionalFields(customer);
         return customerRepository.save(customer);
     }
-
 
     @Override
     public Room updateCleaningStatus(String roomNumber, String cleaningStatus) {
@@ -90,7 +97,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer checkoutCustomer(Long id) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
-        customer.setCheckOutTime(LocalDateTime.now());
+        customer.setCheckOutTime(LocalDate.now());
         customer.setCheckedOut(true);
         Room room = roomRepository.findByRoomNumber(customer.getAllocatedRoomNumber());
         if (room != null) {
@@ -99,7 +106,7 @@ public class CustomerServiceImpl implements CustomerService {
         } else {
             throw new ResourceNotFoundException("Room not found with room number: " + customer.getAllocatedRoomNumber());
         }
-
+        calculateAdditionalFields(customer);
         return customerRepository.save(customer);
     }
 
@@ -117,5 +124,20 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         customerRepository.deleteById(id);
+    }
+
+    private void calculateAdditionalFields(Customer customer) {
+        if (customer.getCheckInTime() != null && customer.getCheckOutTime() != null) {
+            long numberOfDays = ChronoUnit.DAYS.between(customer.getCheckInTime(), customer.getCheckOutTime());
+            customer.setNumberOfDays((int) numberOfDays);
+            double totalAmount = numberOfDays * customer.getRoomRate();
+            customer.setTotalAmount(totalAmount);
+            double pendingBalance = totalAmount - customer.getAdvancePayment();
+            customer.setPendingBalance(pendingBalance);
+        } else {
+            customer.setNumberOfDays(0);
+            customer.setTotalAmount(0.0);
+            customer.setPendingBalance(0.0);
+        }
     }
 }

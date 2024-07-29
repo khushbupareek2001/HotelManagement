@@ -33,14 +33,17 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public Room getRoomByRoomNumber(String roomNumber) {
+        return roomRepository.findByRoomNumber(roomNumber);
+    }
+
+    @Override
     public Room updateRoom(Long id, Room roomDetails) {
         Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
 
         if (!room.getRoomNumber().equals(roomDetails.getRoomNumber()) && roomRepository.existsByRoomNumber(roomDetails.getRoomNumber())) {
             throw new ResourceAlreadyExistsException("Room already exists with room number: " + roomDetails.getRoomNumber());
         }
-
-//        room.setRoomNumber(roomDetails.getRoomNumber());
         room.setAvailability(roomDetails.getAvailability());
         room.setCleaningStatus(roomDetails.getCleaningStatus());
         room.setPrice(roomDetails.getPrice());

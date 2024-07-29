@@ -1,0 +1,227 @@
+.add-employee-body {
+    font-family: Arial, sans-serif;
+    background-color: white;
+    margin-left: 3em;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100vh;
+    background-image: url('./../../assets/images/vectorHotel.jpg');
+    background-size: 50% 85%;
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+.add-employee-container {
+    max-width: 1000px;
+    background-color: #eef0f8;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-left: 2em;
+}
+
+.form-card {
+    padding-right: 1em;
+    padding-left: 1em;
+}
+
+.form-inside {
+    padding-left: 1.5em;
+    padding-right: 1.5em;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+fieldset {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+legend {
+    padding: 0 10px;
+    font-weight: bold;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.input-group {
+    display: flex;
+    max-width: 35em;
+    justify-content: space-between;
+}
+
+.input-group label {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.input-group label:last-child {
+    margin-right: 0;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+select {
+    padding-right: 30px;
+}
+
+.gender-options {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+input[type="radio"] {
+    width: auto;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #494bf5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button[type="button"] {
+    background-color: #6c757d;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.employee-details-container {
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.employee-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.employee-table th,
+.employee-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.employee-table th {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.employee-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.employee-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.smaller-box {
+    width: 100px;
+}
+
+.no-employees {
+    margin: 50px 0;
+    font-size: 18px;
+    color: #968f8f;
+}
+
+.readonly-field {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.fixed-width select {
+    max-width: 13.5em;
+    display: flex;
+}
+
+.error-text {
+    color: red;
+    font-size: 0.7em;
+    margin-top: -5px;
+    margin-bottom: 20px;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 0 10px;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f;
+}
+
+.delete-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.dialog-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 0 10px;
+}
+
+.dialog-button:hover {
+    background-color: #0056b3;
+}

@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/rooms")
-@CrossOrigin(origins = "http://localhost:3002")
+@CrossOrigin(origins = "*")//http://localhost:3002
 public class RoomController {
     @Autowired
     private final RoomService roomService;
@@ -29,6 +29,11 @@ public class RoomController {
     @GetMapping
     public List<Room> getAllRooms() {
         return roomService.getAllRooms();
+    }
+
+    @GetMapping("/{roomNumber}")
+    public Room getRoomByRoomNumber(@PathVariable String roomNumber) {
+        return roomService.getRoomByRoomNumber(roomNumber);
     }
 
     @PutMapping("/{id}")

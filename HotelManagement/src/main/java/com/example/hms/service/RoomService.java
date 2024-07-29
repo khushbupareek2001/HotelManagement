@@ -9,6 +9,8 @@ public interface RoomService {
 
     List<Room> getAllRooms();
 
+    Room getRoomByRoomNumber(String roomNumber);
+
     Room updateRoom(Long id, Room roomDetails);
 
     void deleteRoom(Long id);
