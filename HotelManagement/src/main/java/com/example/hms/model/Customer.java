@@ -3,7 +3,7 @@ package com.example.hms.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -38,10 +38,11 @@ public class Customer {
     @NotNull(message = "Check-in time is mandatory")
     private LocalDate checkInTime;
 
+    @NotNull(message = "Check-out time is mandatory")
     private LocalDate checkOutTime;
 
     @NotBlank(message = "Phone number is mandatory")
-    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Phone number must be 10 digits and a valid number")
+//    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Phone number must be 10 digits and a valid number")
     private String phoneNumber;
 
     private boolean checkedOut;

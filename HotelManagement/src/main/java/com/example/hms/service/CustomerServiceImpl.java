@@ -25,7 +25,7 @@ public class CustomerServiceImpl implements CustomerService {
         this.roomRepository = roomRepository;
     }
 
-    @Override
+    /*@Override
     public Customer addCustomer(Customer customer) {
         customer.setCheckInTime(LocalDate.now());
         customer.setCheckedOut(false);
@@ -36,6 +36,24 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setBedType(room.getBedType());
             customer.setRoomRate(room.getPrice());
 
+            roomRepository.save(room);
+        } else {
+            throw new IllegalStateException("Room is not available");
+        }
+        calculateAdditionalFields(customer);
+        return customerRepository.save(customer);
+    }*/
+    @Override
+    public Customer addCustomer(Customer customer) {
+        Room room = roomRepository.findByRoomNumber(customer.getAllocatedRoomNumber());
+        if (room != null && room.getAvailability() == RoomEnums.Availability.AVAILABLE) {
+            List<Customer> occupiedRooms = customerRepository.findOccupiedRooms(customer.getAllocatedRoomNumber(), customer.getCheckInTime(), customer.getCheckOutTime());
+            if (!occupiedRooms.isEmpty()) {
+                throw new IllegalStateException("Room is already booked during the selected period");
+            }
+           // room.setAvailability(RoomEnums.Availability.OCCUPIED);
+            customer.setBedType(room.getBedType());
+            customer.setRoomRate(room.getPrice());
             roomRepository.save(room);
         } else {
             throw new IllegalStateException("Room is not available");
