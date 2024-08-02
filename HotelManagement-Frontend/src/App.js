@@ -10,15 +10,6 @@ import CustomerDetails from './components/Customer/CustomerDetails.js';
 import CheckoutCustomer from './components/Customer/CheckoutCustomer.js';
 
 function App() {
-  React.useEffect(() => {
-    const currentPath = window.location.pathname;
-    if (currentPath.includes('add-employee')) {
-      document.body.className = 'add-employee-body';
-    }
-    else {
-      document.body.className = 'main-screen-body';
-    }
-  }, []);
 
   return (
     <Router>

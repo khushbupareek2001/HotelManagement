@@ -75,8 +75,10 @@ const RoomDetails = () => {
 
     return (
         <div className="employee-details-container">
-            <h2>Room Details</h2>
-            <button onClick={navigateToAddRoom}>Add Room</button>
+            <div className='row-box'>
+                <h2>Room Details</h2>
+                <button onClick={navigateToAddRoom}>Add Room</button>
+            </div>
             {rooms.length === 0 ? (
                 <div className="no-employees">No Room available !!!</div>
             ) : (
@@ -99,6 +101,7 @@ const RoomDetails = () => {
                                     <input
                                         type="number"
                                         name="price"
+                                        className='smaller-box'
                                         min={1}
                                         value={room.price}
                                         onChange={(e) => handleInputChange(e, room.roomId)}

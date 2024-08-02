@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Employee.css';
@@ -8,13 +8,6 @@ const AddEmployee = () => {
     const navigateToMainScreen = () => {
         navigate('/');
     };
-
-    useEffect(() => {
-        document.body.className = 'add-employee-body';
-        return () => {
-            document.body.className = '';
-        }
-    }, []);
 
     const [name, setName] = useState('');
     const [age, setAge] = useState('18');
@@ -90,71 +83,73 @@ const AddEmployee = () => {
     };
 
     return (
-        <div className="add-employee-container">
-            <div className="form-card">
-                <h2>Add New Employee</h2>
-                <form onSubmit={handleSubmit}>
-                    <fieldset>
-                        <legend>Personal Information</legend>
-                        <div className='form-inside'>
-                            <label>
-                                Full Name:
-                                <input type="text" value={name} onChange={handleNameChange} required />
-                                {errors.name && <p className='error-text'>{errors.name}</p>}
-                            </label>
-                            <div className="input-group">
+        <div className='form-body'>
+            <div className="add-employee-container">
+                <div className="form-card">
+                    <h2>Add New Employee</h2>
+                    <form onSubmit={handleSubmit}>
+                        <fieldset>
+                            <legend>Personal Information</legend>
+                            <div className='form-inside'>
                                 <label>
-                                    Age:
-                                    <input type="number" min={18} max={60} value={age} onChange={(e) => setAge(e.target.value)} required />
-                                    {errors.age && <p className='error-text'>{errors.age}</p>}
+                                    Full Name:
+                                    <input type="text" value={name} onChange={handleNameChange} required />
+                                    {errors.name && <p className='error-text'>{errors.name}</p>}
+                                </label>
+                                <div className="input-group">
+                                    <label>
+                                        Age:
+                                        <input type="number" min={18} max={60} value={age} onChange={(e) => setAge(e.target.value)} required />
+                                        {errors.age && <p className='error-text'>{errors.age}</p>}
+                                    </label>
+                                    <label>
+                                        Gender:
+                                        <div className='gender-options'>
+                                            <input type="radio" checked={gender === 'MALE'} value="MALE" onChange={(e) => setGender(e.target.value)} required /> Male
+                                            <input type="radio" checked={gender === 'FEMALE'} value="FEMALE" onChange={(e) => setGender(e.target.value)} required /> Female
+                                            <input type="radio" checked={gender === 'OTHER'} value="OTHER" onChange={(e) => setGender(e.target.value)} required /> Other
+                                        </div>
+                                    </label>
+                                </div>
+                                <label>
+                                    Phone Number:
+                                    <input type="text" value={phoneNumber} maxLength={10} onChange={handlePhoneNumberChange} required />
+                                    {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
                                 </label>
                                 <label>
-                                    Gender:
-                                    <div className='gender-options'>
-                                        <input type="radio" checked={gender === 'MALE'} value="MALE" onChange={(e) => setGender(e.target.value)} required /> Male
-                                        <input type="radio" checked={gender === 'FEMALE'} value="FEMALE" onChange={(e) => setGender(e.target.value)} required /> Female
-                                        <input type="radio" checked={gender === 'OTHER'} value="OTHER" onChange={(e) => setGender(e.target.value)} required /> Other
-                                    </div>
+                                    Aadhar Number:
+                                    <input type="text" value={aadharNumber} onChange={handleAadharChange} required />
+                                    {errors.aadharNumber && <p className='error-text'>{errors.aadharNumber}</p>}
                                 </label>
+                                <label>
+                                    Email Address:
+                                    <input type="email" value={emailAddress} onChange={handleEmailChange} required />
+                                    {errors.emailAddress && <p className='error-text'>{errors.emailAddress}</p>}
+                                </label>
+                                <div className="input-group">
+                                    <label>
+                                        Salary:
+                                        <input type="number" min={1} value={salary} onChange={handleSalaryChange} required />
+                                        {errors.salary && <p className='error-text'>{errors.salary}</p>}
+                                    </label>
+                                    <label>
+                                        Department:
+                                        <select name="department" value={department} onChange={(e) => setDepartment(e.target.value)} required>
+                                            <option value="">Select</option>
+                                            <option value="House Keeping">House Keeping</option>
+                                            <option value="Reception">Reception</option>
+                                            <option value="Management">Management</option>
+                                            <option value="Food Service">Food Service</option>
+                                        </select>
+                                    </label>
+                                </div>
                             </div>
-                            <label>
-                                Phone Number:
-                                <input type="text" value={phoneNumber} maxLength={10} onChange={handlePhoneNumberChange} required />
-                                {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
-                            </label>
-                            <label>
-                                Aadhar Number:
-                                <input type="text" value={aadharNumber} onChange={handleAadharChange} required />
-                                {errors.aadharNumber && <p className='error-text'>{errors.aadharNumber}</p>}
-                            </label>
-                            <label>
-                                Email Address:
-                                <input type="email" value={emailAddress} onChange={handleEmailChange} required />
-                                {errors.emailAddress && <p className='error-text'>{errors.emailAddress}</p>}
-                            </label>
-                            <div className="input-group">
-                                <label>
-                                    Salary:
-                                    <input type="number" min={1} value={salary} onChange={handleSalaryChange} required />
-                                    {errors.salary && <p className='error-text'>{errors.salary}</p>}
-                                </label>
-                                <label>
-                                    Department:
-                                    <select name="department" value={department} onChange={(e) => setDepartment(e.target.value)} required>
-                                        <option value="">Select</option>
-                                        <option value="House Keeping">House Keeping</option>
-                                        <option value="Reception">Reception</option>
-                                        <option value="Management">Management</option>
-                                        <option value="Food Service">Food Service</option>
-                                    </select>
-                                </label>
-                            </div>
-                        </div>
 
 
-                    </fieldset>
-                    <button type="submit">Save</button>
-                </form>
+                        </fieldset>
+                        <button type="submit">Save</button>
+                    </form>
+                </div>
             </div>
         </div>
     );

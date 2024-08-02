@@ -3,25 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 const AddCustomer = () => {
     const navigate = useNavigate();
     const navigateToMainScreen = () => {
         navigate('/');
     };
-    useEffect(() => {
-        document.body.className = 'add-employee-body';
-        return () => {
-            document.body.className = '';
-        };
-    }, []);
     const [idType, setIdType] = useState('');
     const [idNumber, setIdNumber] = useState('');
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [gender, setGender] = useState('MALE');
+    const [countryCode, setCountryCode] = useState('IN');
+    const [gender, setGender] = useState('');
     const [allocatedRoomNumber, setAllocatedRoomNumber] = useState('');
     const [availableRooms, setAvailableRooms] = useState([]);
+    const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
     const [bedType, setBedType] = useState('');
     const [price, setprice] = useState('');
@@ -30,7 +29,6 @@ const AddCustomer = () => {
     const [advancePayment, setAdvancePayment] = useState('');
     const [pendingBalance, setPendingBalance] = useState(0);
     const [errors, setErrors] = useState({});
-    const checkInTime = formatDateTime();
 
     useEffect(() => {
         const fetchAvailableRooms = async () => {
@@ -60,14 +58,12 @@ const AddCustomer = () => {
         }
     }, [allocatedRoomNumber]);
     useEffect(() => {
-        if (checkInTime && checkOutDate) {
-            const diffTime = Math.abs(new Date(checkOutDate) - new Date(checkInTime));
+        if (checkInDate && checkOutDate) {
+            const diffTime = Math.abs(new Date(checkOutDate) - new Date(checkInDate));
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            console.log("KK check no. of days " + diffDays);
-            console.log("KK checkout date " + checkOutDate);
             setNumberOfDays(diffDays);
         }
-    }, [checkInTime, checkOutDate]);
+    }, [checkInDate, checkOutDate]);
     useEffect(() => {
         setTotalAmount(numberOfDays * price);
     }, [numberOfDays, price]);
@@ -78,18 +74,32 @@ const AddCustomer = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const customer = { idType, idNumber, name, gender, allocatedRoomNumber, checkInTime, phoneNumber, checkOutTime: checkOutDate, totalAmount, advancePayment, pendingBalance };
-        try {
-            await axios.post('http://localhost:8080/api/customers/add', customer);
-            console.log("KK checkout customer final " + customer.checkInTime);
-            console.log("KK checkout date final " + customer.checkOutTime);
-            alert('Customer added successfully');
-            navigateToMainScreen();
-        } catch (error) {
-            console.error('There was an error adding the customer!', error);
-            alert('Failed to add customer');
+        let formValid = true;
+        let validationErrors = {};
+
+        const idMaxLength = idType === 'AADHAR_CARD' ? 12 : idType === 'DRIVING_LICENSE' ? 16 : idType === 'PASSPORT' ? 8 : null;
+        if (idNumber.length !== idMaxLength) {
+            validationErrors.idNumber = `Invalid ID number. Length of ID number must be ${idMaxLength}.`;
+            formValid = false;
+        }
+        if (!gender) {
+            validationErrors.gender = 'Please select gender';
+            formValid = false;
+        }
+        setErrors(validationErrors);
+        if (formValid) {
+            const customer = { idType, idNumber, name, gender, allocatedRoomNumber, checkInTime: checkInDate, phoneNumber, checkOutTime: checkOutDate, totalAmount, advancePayment, pendingBalance };
+            try {
+                await axios.post('http://localhost:8080/api/customers/add', customer);
+                alert('Customer added successfully');
+                navigateToMainScreen();
+            } catch (error) {
+                console.error('There was an error adding the customer!', error);
+                alert('Failed to add customer');
+            }
         }
     };
+
     const handleNameChange = (e) => {
         const value = e.target.value;
         if (/^[A-Za-z\s]*$/.test(value) && value.length <= 30 && value.trimStart() === value) {
@@ -102,23 +112,34 @@ const AddCustomer = () => {
     const handleIdNumberChange = (e) => {
         const value = e.target.value;
         const idMaxLength = idType === 'AADHAR_CARD' ? 12 : idType === 'DRIVING_LICENSE' ? 16 : idType === 'PASSPORT' ? 8 : null;
-
         if (idMaxLength && value.length > idMaxLength) return;
-        if (/^[A-Za-z0-9]*$/.test(value)) {
+        if ((idType === 'AADHAR_CARD' && /^\d*$/.test(value)) ||
+            (idType !== 'AADHAR_CARD' && /^[A-Za-z0-9]*$/.test(value))) {
             setIdNumber(value);
             setErrors(prev => ({ ...prev, idNumber: '' }));
         } else {
-            setErrors(prev => ({ ...prev, idNumber: 'ID number should not contain special characters.' }));
+            setErrors(prev => ({ ...prev, idNumber: `Invalid input for ${idType.replace('_', ' ').toLowerCase()}.` }));
         }
     };
-    const handlePhoneNumberChange = (e) => {
-        const value = e.target.value.replace(/[^0-9]/g, '');
-        if (value === '' || /^[6-9]/.test(value)) {
-            setPhoneNumber(value);
-            setErrors(prev => ({ ...prev, phoneNumber: '' }));
-        } else {
-            setErrors(prev => ({ ...prev, phoneNumber: 'Phone number should be a valid number.' }));
+    const handlePhoneNumberChange = (value) => {
+        setPhoneNumber(value);
+        if (value) {
+            const phoneNumberObj = parsePhoneNumberFromString(value);
+            if (phoneNumberObj && !phoneNumberObj.isPossible()) {
+                setErrors({ ...errors, phoneNumber: 'Invalid phone number for the selected country.' });
+            } else {
+                setErrors({ ...errors, phoneNumber: '' });
+            }
         }
+    };
+    const handleCountryChange = (country) => {
+        setCountryCode(country);
+        setErrors((prev) => ({ ...prev, phoneNumber: '' }));
+        if (country !== 'IN') {
+            setIdType('PASSPORT');
+        }
+        else { setIdType(''); }
+        setIdNumber('');
     };
     const handleAdvancePaymentChange = (e) => {
         const value = e.target.value;
@@ -132,13 +153,7 @@ const AddCustomer = () => {
     const handleIdTypeChange = (e) => {
         setIdType(e.target.value);
         setIdNumber('');
-    }
-    function formatDateTime() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = (now.getMonth() + 1).toString().padStart(2, '0');
-        const day = now.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        setErrors(prev => ({ ...prev, idNumber: '' }));
     }
     function formatCheckOutDateTime(now) {
         const year = now.getFullYear();
@@ -148,202 +163,224 @@ const AddCustomer = () => {
     }
 
     return (
-        <div className="add-employee-container">
-            <div className="form-card">
-                {availableRooms.length === 0 ? (
-                    <p>Oops, no room available!!!</p>
-                ) : (
-                    <form onSubmit={handleSubmit}>
-                        <fieldset>
-                            <legend>Guest Information</legend>
-                            <div className='form-inside'>
-                                <label>
-                                    Full Name:
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={handleNameChange}
-                                        required
-                                    />
-                                    {errors.name && <p className='error-text'>{errors.name}</p>}
-                                </label>
-                                <div className="input-group">
+        <div className='form-body'>
+            <div className="add-employee-container">
+                <div className="form-card">
+                    {availableRooms.length === 0 ? (
+                        <p>Oops, no room available!!!</p>
+                    ) : (
+                        <form onSubmit={handleSubmit}>
+                            <fieldset>
+                                <legend>Guest Information</legend>
+                                <div className='form-inside'>
                                     <label>
-                                        ID Type:
-                                        <select
-                                            value={idType}
-                                            onChange={handleIdTypeChange}
-                                            required
-                                        >
-                                            <option value="">Select</option>
-                                            <option value="PASSPORT">Passport</option>
-                                            <option value="DRIVING_LICENSE">Driving License</option>
-                                            <option value="AADHAR_CARD">Aadhar Card</option>
-                                        </select>
-                                    </label>
-                                    <label>
-                                        ID Number:
+                                        Full Name:
                                         <input
                                             type="text"
-                                            value={idNumber}
-                                            onChange={handleIdNumberChange}
+                                            value={name}
+                                            onChange={handleNameChange}
                                             required
                                         />
-                                        {errors.idNumber && <p className='error-text'>{errors.idNumber}</p>}
+                                        {errors.name && <p className='error-text'>{errors.name}</p>}
                                     </label>
-                                </div>
-                                <div className="input-group">
-                                    <label>
-                                        Phone Number:
-                                        <input
-                                            type="text"
-                                            maxLength={10}
-                                            value={phoneNumber}
-                                            onChange={handlePhoneNumberChange}
-                                            required
-                                        />
-                                        {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
-                                    </label>
-                                    <label>
-                                        Gender:
-                                        <div className='gender-options'>
-                                            <input
-                                                type="radio"
-                                                value="MALE"
-                                                checked={gender === 'MALE'}
-                                                onChange={(e) => setGender(e.target.value)}
+                                    <div className="input-group">
+                                        <label>
+                                            Phone Number:
+                                            <PhoneInput
+                                                international
+                                                defaultCountry='IN'
+                                                value={phoneNumber}
+                                                onChange={handlePhoneNumberChange}
+                                                onCountryChange={handleCountryChange}
                                                 required
-                                            /> Male
-                                            <input
-                                                type="radio"
-                                                value="FEMALE"
-                                                checked={gender === 'FEMALE'}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                required
-                                            /> Female
-                                            <input type="radio"
-                                                value="OTHER"
-                                                checked={gender === 'OTHER'}
-                                                onChange={(e) => setGender(e.target.value)}
-                                                required
-                                            /> Other</div>
-
-                                    </label>
-                                </div>
-                                <div className="input-group">
-                                    <label className='fixed-width'>
-                                        Room Number:
-                                        <select
-                                            value={allocatedRoomNumber}
-                                            onChange={(e) => setAllocatedRoomNumber(e.target.value)}
-                                            required
-                                        >
-                                            <option value="">Select</option>
-
-                                            {availableRooms.length > 0 ? (
-                                                availableRooms.map(room => (
-                                                    <option key={room.id} value={room.roomNumber}>{room.roomNumber}</option>
-                                                ))
+                                            />
+                                            {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
+                                        </label>
+                                        <label>
+                                            Gender:
+                                            <div className='gender-options'>
+                                                <input
+                                                    type="radio"
+                                                    value="MALE"
+                                                    checked={gender === 'MALE'}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    required
+                                                /> Male
+                                                <input
+                                                    type="radio"
+                                                    value="FEMALE"
+                                                    checked={gender === 'FEMALE'}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    required
+                                                /> Female
+                                                <input type="radio"
+                                                    value="OTHER"
+                                                    checked={gender === 'OTHER'}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    required
+                                                /> Other</div>
+                                            {errors.gender && <p className='error-text'>{errors.gender}</p>}
+                                        </label>
+                                    </div>
+                                    <div className="input-group">
+                                        <label>
+                                            ID Type:
+                                            {countryCode === 'IN' ? (
+                                                <select
+                                                    value={idType}
+                                                    onChange={handleIdTypeChange}
+                                                    required
+                                                >
+                                                    <option value="">Select</option>
+                                                    <option value="DRIVING_LICENSE">Driving License</option>
+                                                    <option value="AADHAR_CARD">Aadhar Card</option>
+                                                    <option value="PASSPORT">Passport</option>
+                                                </select>
                                             ) : (
-                                                <option value="">No rooms available!!!</option>
+                                                <input
+                                                    type='text'
+                                                    value="PASSPORT"
+                                                    readOnly
+                                                />
                                             )}
-                                        </select>
-                                    </label>
-                                    {allocatedRoomNumber && (
-                                        <>
-                                            <label>
-                                                Bed Type:
-                                                <input
-                                                    type="text"
-                                                    className='readonly-field'
-                                                    value={bedType}
-                                                    readOnly
-                                                />
-                                            </label>
-                                            <label>
-                                                Room Rate:
-                                                <input
-                                                    type="number"
-                                                    className='readonly-field'
-                                                    value={price}
-                                                    readOnly
-                                                />
-                                            </label>
-                                        </>
-                                    )}
-                                </div>
-                                <div className='input-group'>
+                                        </label>
+                                        <label>
+                                            ID Number:
+                                            <input
+                                                type="text"
+                                                value={idNumber}
+                                                onChange={handleIdNumberChange}
+                                                required
+                                            />
+                                            {errors.idNumber && <p className='error-text'>{errors.idNumber}</p>}
+                                        </label>
+                                    </div>
+
+                                    <div className="input-group">
+                                        <label className='fixed-width'>
+                                            Room Number:
+                                            <select
+                                                value={allocatedRoomNumber}
+                                                onChange={(e) => setAllocatedRoomNumber(e.target.value)}
+                                                required
+                                            >
+                                                <option value="">Select</option>
+
+                                                {availableRooms.length > 0 ? (
+                                                    availableRooms.map(room => (
+                                                        <option key={room.id} value={room.roomNumber}>{room.roomNumber}</option>
+                                                    ))
+                                                ) : (
+                                                    <option value="">No rooms available!!!</option>
+                                                )}
+                                            </select>
+                                        </label>
+                                        {allocatedRoomNumber && (
+                                            <>
+                                                <label>
+                                                    Bed Type:
+                                                    <input
+                                                        type="text"
+                                                        className='readonly-field'
+                                                        value={bedType}
+                                                        readOnly
+                                                    />
+                                                </label>
+                                                <label>
+                                                    Room Rate:
+                                                    <input
+                                                        type="number"
+                                                        className='readonly-field'
+                                                        value={price}
+                                                        readOnly
+                                                    />
+                                                </label>
+                                            </>
+                                        )}
+                                    </div>
+                                    <div className='input-group'>
+                                        <label>
+                                            Check-In Date:
+                                            <DatePicker
+                                                id='checkInDate'
+                                                placeholderText='Choose Date'
+                                                selected={checkInDate}
+                                                onChange={date => {
+                                                    date = formatCheckOutDateTime(date);
+                                                    console.log("KK checkin date:" + date)
+                                                    setCheckInDate(date)
+                                                    setCheckOutDate('')
+                                                }}
+                                                minDate={new Date()}
+                                                dateFormat="yyyy-MM-dd"
+                                                required
+                                            />
+                                        </label>
+                                        <label>
+                                            Check-Out Date:
+                                            <DatePicker
+                                                id='checkOutDate'
+                                                placeholderText='Choose Date'
+                                                selected={checkOutDate}
+                                                onChange={date => {
+                                                    date = formatCheckOutDateTime(date);
+                                                    console.log("KK checkout date:" + date)
+                                                    setCheckOutDate(date)
+                                                }}
+                                                dateFormat="yyyy-MM-dd"
+                                                minDate={new Date(new Date(checkInDate).setDate(new Date(checkInDate).getDate() + 1))}
+                                                required
+                                            />
+                                        </label>
+                                        <label>
+                                            Number of Days:
+                                            <input
+                                                type="number"
+                                                className='readonly-field'
+                                                value={numberOfDays}
+                                                readOnly
+                                            />
+                                        </label>
+                                    </div>
                                     <label>
-                                        Check-In Date:
-                                        <input
-                                            type="text"
-                                            className='readonly-field'
-                                            value={checkInTime}
-                                            readOnly
-                                        />
-                                    </label>
-                                    <label>
-                                        Check-Out Date:
-                                        <DatePicker
-                                            placeholderText='Choose Date'
-                                            selected={checkOutDate}
-                                            onChange={date => {
-                                                date = formatCheckOutDateTime(date);
-                                                setCheckOutDate(date)
-                                            }}
-                                            dateFormat="yyyy-MM-dd"
-                                            minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
-                                            required
-                                        />
-                                    </label>
-                                    <label>
-                                        Number of Days:
+                                        Total Amount:
                                         <input
                                             type="number"
                                             className='readonly-field'
-                                            value={numberOfDays}
+                                            value={totalAmount}
                                             readOnly
                                         />
                                     </label>
+                                    <div className='input-group'>
+                                        <label>
+                                            Advance Payment:
+                                            <input
+                                                type="number"
+                                                value={advancePayment}
+                                                onChange={handleAdvancePaymentChange}
+                                                required
+                                            />
+                                            {errors.advancePayment && <p className='error-text'>{errors.advancePayment}</p>}
+                                        </label>
+                                        <label>
+                                            Pending Balance:
+                                            <input
+                                                type="number"
+                                                className='readonly-field'
+                                                value={pendingBalance}
+                                                readOnly
+                                            />
+                                        </label>
+                                    </div>
+                                    {errors.general && <p className='error-text'>{errors.general}</p>}
                                 </div>
-                                <label>
-                                    Total Amount:
-                                    <input
-                                        type="number"
-                                        className='readonly-field'
-                                        value={totalAmount}
-                                        readOnly
-                                    />
-                                </label>
-                                <div className='input-group'>
-                                    <label>
-                                        Advance Payment:
-                                        <input
-                                            type="number"
-                                            value={advancePayment}
-                                            onChange={handleAdvancePaymentChange}
-                                            required
-                                        />
-                                        {errors.advancePayment && <p className='error-text'>{errors.advancePayment}</p>}
-                                    </label>
-                                    <label>
-                                        Pending Balance:
-                                        <input
-                                            type="number"
-                                            className='readonly-field'
-                                            value={pendingBalance}
-                                            readOnly
-                                        />
-                                    </label>
-                                </div>
-                                {errors.general && <p className='error-text'>{errors.general}</p>}
-                            </div>
-                        </fieldset>
-                        <button type="submit">Save</button>
-                    </form>
-                )}
-            </div>
-        </div >
+                            </fieldset>
+                            <button type="submit">Save</button>
+                        </form>
+                    )}
+                </div>
+            </div >
+        </div>
     );
 };
 export default AddCustomer;
