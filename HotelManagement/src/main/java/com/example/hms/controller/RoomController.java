@@ -1,5 +1,6 @@
 package com.example.hms.controller;
 
+import com.example.hms.dto.RoomDTO;
 import com.example.hms.model.Room;
 import com.example.hms.service.RoomService;
 import jakarta.validation.Valid;
@@ -22,8 +23,8 @@ public class RoomController {
     }
 
     @PostMapping
-    public Room addRoom(@Valid @RequestBody Room room) {
-        return roomService.addRoom(room);
+    public Room addRoom(@Valid @RequestBody RoomDTO roomDTO) {
+        return roomService.addRoom(roomDTO);
     }
 
     @GetMapping
@@ -37,8 +38,8 @@ public class RoomController {
     }
 
     @PutMapping("/{id}")
-    public Room updateRoom(@PathVariable Long id, @Valid @RequestBody Room roomDetails) {
-        return roomService.updateRoom(id, roomDetails);
+    public Room updateRoom(@PathVariable Long id, @Valid @RequestBody RoomDTO roomDTO) {
+        return roomService.updateRoom(id, roomDTO);
     }
 
     @DeleteMapping("/{id}")

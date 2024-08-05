@@ -1,5 +1,6 @@
 package com.example.hms.controller;
 
+import com.example.hms.dto.EmployeeDTO;
 import com.example.hms.model.Employee;
 import com.example.hms.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -22,8 +23,8 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Employee addEmployee(@Valid @RequestBody Employee employee) {
-        return employeeService.addEmployee(employee);
+    public Employee addEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
+        return employeeService.addEmployee(employeeDTO);
     }
 
     @GetMapping
@@ -32,8 +33,8 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
-    public Employee updateEmployee(@PathVariable Long id, @Valid @RequestBody Employee employee) {
-        return employeeService.updateEmployee(id, employee);
+    public Employee updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employeeDTO) {
+        return employeeService.updateEmployee(id, employeeDTO);
     }
 
     @DeleteMapping("/{id}")

@@ -1,5 +1,6 @@
 package com.example.hms.service;
 
+import com.example.hms.dto.EmployeeDTO;
 import com.example.hms.exception.ResourceNotFoundException;
 import com.example.hms.model.Employee;
 import com.example.hms.repository.EmployeeRepository;
@@ -15,11 +16,26 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    private Employee toEntity(EmployeeDTO dto) {
+        Employee employee = new Employee();
+        employee.setEmployeeId(dto.getEmployeeId());
+        employee.setName(dto.getName());
+        employee.setAge(dto.getAge());
+        employee.setGender(dto.getGender());
+        employee.setSalary(dto.getSalary());
+        employee.setPhoneNumber(dto.getPhoneNumber());
+        employee.setAadharNumber(dto.getAadharNumber());
+        employee.setEmailAddress(dto.getEmailAddress());
+        employee.setDepartment(dto.getDepartment());
+        return employee;
+    }
+
     @Override
-    public Employee addEmployee(Employee employee) {
-        if (employeeRepository.existsByAadharNumber(employee.getAadharNumber())) {
-            throw new ResourceAlreadyExistsException("Employee with Aadhar number " + employee.getAadharNumber() + " already exists.");
+    public Employee addEmployee(EmployeeDTO employeeDTO) {
+        if (employeeRepository.existsByAadharNumber(employeeDTO.getAadharNumber())) {
+            throw new ResourceAlreadyExistsException("Employee with Aadhar number " + employeeDTO.getAadharNumber() + " already exists.");
         }
+        Employee employee = toEntity(employeeDTO);
         return employeeRepository.save(employee);
     }
 
@@ -29,16 +45,16 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee updateEmployee(Long id, Employee updatedEmployee) {
+    public Employee updateEmployee(Long id, EmployeeDTO updatedEmployeeDTO) {
         Employee employee = employeeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
-        employee.setName(updatedEmployee.getName());
-        employee.setAge(updatedEmployee.getAge());
-        employee.setGender(updatedEmployee.getGender());
-        employee.setSalary(updatedEmployee.getSalary());
-        employee.setPhoneNumber(updatedEmployee.getPhoneNumber());
-        employee.setAadharNumber(updatedEmployee.getAadharNumber());
-        employee.setEmailAddress(updatedEmployee.getEmailAddress());
-        employee.setDepartment(updatedEmployee.getDepartment());
+        employee.setName(updatedEmployeeDTO.getName());
+        employee.setAge(updatedEmployeeDTO.getAge());
+        employee.setGender(updatedEmployeeDTO.getGender());
+        employee.setSalary(updatedEmployeeDTO.getSalary());
+        employee.setPhoneNumber(updatedEmployeeDTO.getPhoneNumber());
+        employee.setAadharNumber(updatedEmployeeDTO.getAadharNumber());
+        employee.setEmailAddress(updatedEmployeeDTO.getEmailAddress());
+        employee.setDepartment(updatedEmployeeDTO.getDepartment());
         return employeeRepository.save(employee);
     }
 

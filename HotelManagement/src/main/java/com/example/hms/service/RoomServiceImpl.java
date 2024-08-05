@@ -1,5 +1,6 @@
 package com.example.hms.service;
 
+import com.example.hms.dto.RoomDTO;
 import com.example.hms.exception.ResourceAlreadyExistsException;
 import com.example.hms.exception.ResourceNotFoundException;
 import com.example.hms.model.Room;
@@ -19,11 +20,23 @@ public class RoomServiceImpl implements RoomService {
         this.roomRepository = roomRepository;
     }
 
+    private Room toEntity(RoomDTO dto) {
+        Room room = new Room();
+        room.setRoomId(dto.getRoomId());
+        room.setRoomNumber(dto.getRoomNumber());
+        room.setAvailability(dto.getAvailability());
+        room.setCleaningStatus(dto.getCleaningStatus());
+        room.setPrice(dto.getPrice());
+        room.setBedType(dto.getBedType());
+        return room;
+    }
+
     @Override
-    public Room addRoom(Room room) {
-        if (roomRepository.existsByRoomNumber(room.getRoomNumber())) {
-            throw new ResourceAlreadyExistsException("Room already exists with room number: " + room.getRoomNumber());
+    public Room addRoom(RoomDTO roomDTO) {
+        if (roomRepository.existsByRoomNumber(roomDTO.getRoomNumber())) {
+            throw new ResourceAlreadyExistsException("Room already exists with room number: " + roomDTO.getRoomNumber());
         }
+        Room room = toEntity(roomDTO);
         return roomRepository.save(room);
     }
 
@@ -34,20 +47,24 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Room getRoomByRoomNumber(String roomNumber) {
-        return roomRepository.findByRoomNumber(roomNumber);
+        Room room = roomRepository.findByRoomNumber(roomNumber);
+        if (room == null) {
+            throw new ResourceNotFoundException("Room not found with room number: " + roomNumber);
+        }
+        return room;
     }
 
     @Override
-    public Room updateRoom(Long id, Room roomDetails) {
+    public Room updateRoom(Long id, RoomDTO roomDTO) {
         Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
 
-        if (!room.getRoomNumber().equals(roomDetails.getRoomNumber()) && roomRepository.existsByRoomNumber(roomDetails.getRoomNumber())) {
-            throw new ResourceAlreadyExistsException("Room already exists with room number: " + roomDetails.getRoomNumber());
+        if (!room.getRoomNumber().equals(roomDTO.getRoomNumber()) && roomRepository.existsByRoomNumber(roomDTO.getRoomNumber())) {
+            throw new ResourceAlreadyExistsException("Room already exists with room number: " + roomDTO.getRoomNumber());
         }
-        room.setAvailability(roomDetails.getAvailability());
-        room.setCleaningStatus(roomDetails.getCleaningStatus());
-        room.setPrice(roomDetails.getPrice());
-        room.setBedType(roomDetails.getBedType());
+        room.setAvailability(roomDTO.getAvailability());
+        room.setCleaningStatus(roomDTO.getCleaningStatus());
+        room.setPrice(roomDTO.getPrice());
+        room.setBedType(roomDTO.getBedType());
 
         return roomRepository.save(room);
     }

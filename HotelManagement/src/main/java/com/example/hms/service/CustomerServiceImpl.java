@@ -1,5 +1,6 @@
 package com.example.hms.service;
 
+import com.example.hms.dto.CustomerDTO;
 import com.example.hms.exception.ResourceNotFoundException;
 import com.example.hms.model.Customer;
 import com.example.hms.model.Room;
@@ -25,39 +26,42 @@ public class CustomerServiceImpl implements CustomerService {
         this.roomRepository = roomRepository;
     }
 
-    /*@Override
-    public Customer addCustomer(Customer customer) {
-        customer.setCheckInTime(LocalDate.now());
-        customer.setCheckedOut(false);
+    private Customer toEntity(CustomerDTO dto) {
+        Customer customer = new Customer();
+        customer.setId(dto.getId());
+        customer.setIdType(dto.getIdType());
+        customer.setIdNumber(dto.getIdNumber());
+        customer.setName(dto.getName());
+        customer.setGender(dto.getGender());
+        customer.setAllocatedRoomNumber(dto.getAllocatedRoomNumber());
+        customer.setCheckInTime(dto.getCheckInTime());
+        customer.setCheckOutTime(dto.getCheckOutTime());
+        customer.setPhoneNumber(dto.getPhoneNumber());
+        customer.setCheckedOut(dto.isCheckedOut());
+        customer.setBedType(dto.getBedType());
+        customer.setRoomRate(dto.getRoomRate());
+        customer.setNumberOfDays(dto.getNumberOfDays());
+        customer.setTotalAmount(dto.getTotalAmount());
+        customer.setAdvancePayment(dto.getAdvancePayment());
+        customer.setPendingBalance(dto.getPendingBalance());
+        return customer;
+    }
 
-        Room room = roomRepository.findByRoomNumber(customer.getAllocatedRoomNumber());
-        if (room != null && room.getAvailability() == RoomEnums.Availability.AVAILABLE) {
-            room.setAvailability(RoomEnums.Availability.OCCUPIED);
-            customer.setBedType(room.getBedType());
-            customer.setRoomRate(room.getPrice());
-
-            roomRepository.save(room);
-        } else {
-            throw new IllegalStateException("Room is not available");
-        }
-        calculateAdditionalFields(customer);
-        return customerRepository.save(customer);
-    }*/
     @Override
-    public Customer addCustomer(Customer customer) {
-        Room room = roomRepository.findByRoomNumber(customer.getAllocatedRoomNumber());
+    public Customer addCustomer(CustomerDTO customerDTO) {
+        Room room = roomRepository.findByRoomNumber(customerDTO.getAllocatedRoomNumber());
         if (room != null && room.getAvailability() == RoomEnums.Availability.AVAILABLE) {
-            List<Customer> occupiedRooms = customerRepository.findOccupiedRooms(customer.getAllocatedRoomNumber(), customer.getCheckInTime(), customer.getCheckOutTime());
+            List<Customer> occupiedRooms = customerRepository.findOccupiedRooms(customerDTO.getAllocatedRoomNumber(), customerDTO.getCheckInTime(), customerDTO.getCheckOutTime());
             if (!occupiedRooms.isEmpty()) {
                 throw new IllegalStateException("Room is already booked during the selected period");
             }
-           // room.setAvailability(RoomEnums.Availability.OCCUPIED);
-            customer.setBedType(room.getBedType());
-            customer.setRoomRate(room.getPrice());
+            customerDTO.setBedType(room.getBedType());
+            customerDTO.setRoomRate(room.getPrice());
             roomRepository.save(room);
         } else {
             throw new IllegalStateException("Room is not available");
         }
+        Customer customer = toEntity(customerDTO);
         calculateAdditionalFields(customer);
         return customerRepository.save(customer);
     }

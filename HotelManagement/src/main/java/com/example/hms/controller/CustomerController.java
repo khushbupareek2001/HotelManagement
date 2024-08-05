@@ -1,5 +1,6 @@
 package com.example.hms.controller;
 
+import com.example.hms.dto.CustomerDTO;
 import com.example.hms.model.Customer;
 import com.example.hms.model.Room;
 import com.example.hms.service.CustomerService;
@@ -23,8 +24,8 @@ public class CustomerController {
     }
 
     @PostMapping("/add")
-    public Customer addCustomer(@Valid @RequestBody Customer customer) {
-        return customerService.addCustomer((customer));
+    public Customer addCustomer(@Valid @RequestBody CustomerDTO customerDTO) {
+        return customerService.addCustomer((customerDTO));
     }
 
     @GetMapping("/available-rooms")

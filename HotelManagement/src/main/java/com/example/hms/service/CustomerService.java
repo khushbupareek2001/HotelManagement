@@ -1,12 +1,13 @@
 package com.example.hms.service;
 
+import com.example.hms.dto.CustomerDTO;
 import com.example.hms.model.Customer;
 import com.example.hms.model.Room;
 
 import java.util.List;
 
 public interface CustomerService {
-    Customer addCustomer(Customer customer);
+    Customer addCustomer(CustomerDTO customerDTO);
 
     List<Room> getAvailableRooms();
 
