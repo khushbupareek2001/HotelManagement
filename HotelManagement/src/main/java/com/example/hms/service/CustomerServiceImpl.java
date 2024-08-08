@@ -1,6 +1,7 @@
 package com.example.hms.service;
 
 import com.example.hms.dto.CustomerDTO;
+import com.example.hms.exception.ResourceAlreadyExistsException;
 import com.example.hms.exception.ResourceNotFoundException;
 import com.example.hms.model.Customer;
 import com.example.hms.model.Room;
@@ -50,13 +51,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer addCustomer(CustomerDTO customerDTO) {
         Room room = roomRepository.findByRoomNumber(customerDTO.getAllocatedRoomNumber());
-        if (room != null && room.getAvailability() == RoomEnums.Availability.AVAILABLE) {
+        if (room != null) {
             List<Customer> occupiedRooms = customerRepository.findOccupiedRooms(customerDTO.getAllocatedRoomNumber(), customerDTO.getCheckInTime(), customerDTO.getCheckOutTime());
             if (!occupiedRooms.isEmpty()) {
-                throw new IllegalStateException("Room is already booked during the selected period");
+                throw new ResourceAlreadyExistsException("Room is already booked during the selected period.");
             }
             customerDTO.setBedType(room.getBedType());
             customerDTO.setRoomRate(room.getPrice());
+
+            if (customerDTO.getCheckInTime().isEqual(LocalDate.now())) {
+                room.setAvailability(RoomEnums.Availability.OCCUPIED);
+            }
             roomRepository.save(room);
         } else {
             throw new IllegalStateException("Room is not available");
@@ -83,37 +88,42 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer updateCustomerRoom(Long id, String roomNumber) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
 
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
         Room oldRoom = roomRepository.findByRoomNumber(customer.getAllocatedRoomNumber());
         Room newRoom = roomRepository.findByRoomNumber(roomNumber);
-        if (oldRoom != null) {
-            oldRoom.setAvailability(RoomEnums.Availability.AVAILABLE);
-            roomRepository.save(oldRoom);
-        }
-        if (newRoom != null && newRoom.getAvailability() == RoomEnums.Availability.AVAILABLE) {
-            newRoom.setAvailability(RoomEnums.Availability.OCCUPIED);
-            customer.setAllocatedRoomNumber(roomNumber);
-            customer.setBedType(newRoom.getBedType());
-            customer.setRoomRate(newRoom.getPrice());
-            roomRepository.save(newRoom);
-        } else {
+        if (newRoom == null) {
             throw new IllegalStateException("New room is not available");
         }
+        List<Customer> occupiedRooms = customerRepository.findOccupiedRooms(
+                roomNumber,
+                customer.getCheckInTime(),
+                customer.getCheckOutTime()
+        );
+        if (!occupiedRooms.isEmpty()) {
+            throw new ResourceAlreadyExistsException("New room is already booked during the selected period.");
+        }
+
+        LocalDate today = LocalDate.now();
+        boolean isBookingPeriod = !customer.isCheckedOut() &&
+                (today.isEqual(customer.getCheckInTime()) || (today.isAfter(customer.getCheckInTime())
+                        && today.isBefore(customer.getCheckOutTime())));
+
+        if (isBookingPeriod) {
+            if (oldRoom != null) {
+                oldRoom.setAvailability(RoomEnums.Availability.AVAILABLE);
+                roomRepository.save(oldRoom);
+            }
+            newRoom.setAvailability(RoomEnums.Availability.OCCUPIED);
+            roomRepository.save(newRoom);
+        }
+
+        customer.setAllocatedRoomNumber(roomNumber);
+        customer.setBedType(newRoom.getBedType());
+        customer.setRoomRate(newRoom.getPrice());
         calculateAdditionalFields(customer);
         return customerRepository.save(customer);
-    }
-
-    @Override
-    public Room updateCleaningStatus(String roomNumber, String cleaningStatus) {
-        Room room = roomRepository.findByRoomNumber(roomNumber);
-        if (room != null) {
-            RoomEnums.CleaningStatus status = RoomEnums.CleaningStatus.fromString(cleaningStatus);
-            room.setCleaningStatus(status);
-            return roomRepository.save(room);
-        } else {
-            throw new ResourceNotFoundException("Room not found with room number: " + roomNumber);
-        }
     }
 
     @Override

@@ -29,7 +29,6 @@ public class EmployeeDTO {
     private double salary;
 
     @NotBlank(message = "Phone number is mandatory")
-    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Phone number must be 10 digits and a valid number")
     private String phoneNumber;
 
     @NotBlank(message = "Aadhar number is mandatory")

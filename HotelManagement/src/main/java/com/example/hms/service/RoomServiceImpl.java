@@ -3,21 +3,26 @@ package com.example.hms.service;
 import com.example.hms.dto.RoomDTO;
 import com.example.hms.exception.ResourceAlreadyExistsException;
 import com.example.hms.exception.ResourceNotFoundException;
+import com.example.hms.model.Customer;
 import com.example.hms.model.Room;
+import com.example.hms.repository.CustomerRepository;
 import com.example.hms.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
+    private final CustomerRepository customerRepository;
 
     @Autowired
-    public RoomServiceImpl(RoomRepository roomRepository) {
+    public RoomServiceImpl(RoomRepository roomRepository, CustomerRepository customerRepository) {
         this.roomRepository = roomRepository;
+        this.customerRepository = customerRepository;
     }
 
     private Room toEntity(RoomDTO dto) {
@@ -67,6 +72,12 @@ public class RoomServiceImpl implements RoomService {
         room.setBedType(roomDTO.getBedType());
 
         return roomRepository.save(room);
+    }
+
+    public boolean hasActiveCustomers(String roomNumber) {
+        LocalDate now = LocalDate.now();
+        List<Customer> activeCustomers = customerRepository.findCurrentOrFutureBookings(roomNumber, now);
+        return !activeCustomers.isEmpty();
     }
 
     @Override

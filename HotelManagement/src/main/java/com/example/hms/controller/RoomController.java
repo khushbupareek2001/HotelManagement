@@ -5,6 +5,7 @@ import com.example.hms.model.Room;
 import com.example.hms.service.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +41,16 @@ public class RoomController {
     @PutMapping("/{id}")
     public Room updateRoom(@PathVariable Long id, @Valid @RequestBody RoomDTO roomDTO) {
         return roomService.updateRoom(id, roomDTO);
+    }
+
+    @GetMapping("/{roomNumber}/has-bookings")
+    public ResponseEntity<Boolean> checkRoomBookings(@PathVariable String roomNumber) {
+        try {
+            boolean hasBookings = roomService.hasActiveCustomers(roomNumber);
+            return ResponseEntity.ok(hasBookings);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
     }
 
     @DeleteMapping("/{id}")

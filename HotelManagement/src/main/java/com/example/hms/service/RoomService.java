@@ -14,5 +14,7 @@ public interface RoomService {
 
     Room updateRoom(Long id, RoomDTO roomDetails);
 
+    boolean hasActiveCustomers(String roomNumber);
+
     void deleteRoom(Long id);
 }

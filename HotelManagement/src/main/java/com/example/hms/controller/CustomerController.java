@@ -48,11 +48,6 @@ public class CustomerController {
         return customerService.updateCustomerRoom(id, roomNumber);
     }
 
-    @PutMapping("/update-cleaning-status/{roomNumber}")
-    public Room updateCleaningStatus(@PathVariable String roomNumber, @RequestParam String cleaningStatus) {
-        return customerService.updateCleaningStatus(roomNumber, cleaningStatus);
-    }
-
     @PutMapping("/checkout/{id}")
     public Customer checkoutCustomer(@PathVariable Long id) {
         return customerService.checkoutCustomer(id);

@@ -17,8 +17,6 @@ public interface CustomerService {
 
     Customer updateCustomerRoom(Long id, String roomNumber);
 
-    Room updateCleaningStatus(String roomNumber, String cleaningStatus);
-
     Customer checkoutCustomer(Long id);
 
     void completeCheckout(Long id);
