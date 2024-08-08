@@ -58,7 +58,7 @@ const CheckoutCustomer = () => {
                                 <div className="input-group">
                                     <label>
                                         ID Type:
-                                        <input type="text" value={customer.idType} readOnly />
+                                        <input type="text" value={customer.idType === "AADHAR_CARD" ? "AADHAR CARD" : customer.idType === "DRIVING_LICENSE" ? "DRIVING LICENSE" : "PASSPORT"} readOnly />
                                     </label>
                                     <label>
                                         ID Number:

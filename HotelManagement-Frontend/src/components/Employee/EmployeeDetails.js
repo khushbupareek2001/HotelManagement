@@ -13,6 +13,8 @@ const EmployeeDetails = () => {
     const [deleteEmployeeId, setDeleteEmployeeId] = useState(null);
     const [deleteDialogMessage, setDeleteDialogMessage] = useState('');
     const [showConfirmationButtons, setShowConfirmationButtons] = useState(false);
+    const [editingEmployeeId, setEditingEmployeeId] = useState(null);
+    const [editedEmployeeDetails, setEditedEmployeeDetails] = useState({});
 
     useEffect(() => {
         const fetchEmployees = async () => {
@@ -26,48 +28,48 @@ const EmployeeDetails = () => {
         };
         fetchEmployees();
     }, []);
-    const handleInputChange = async (e, employeeId) => {
-        const { name, value } = e.target;
-        let validationError = '';
-        switch (name) {
-            case 'age':
-                if (value < 18 || value > 60) {
-                    validationError = 'Age must be between 18 and 60.';
-                }
-                break;
-            case 'salary':
-                if (value < 0) {
-                    validationError = 'Salary must be a positive number.';
-                }
-                break;
-            case 'phoneNumber':
-                if (!/^[6-9]\d{9}$/.test(value)) {
-                    validationError = 'Phone number must be 10 digits and a valid number.';
-                }
-                break;
-            default:
-                break;
+    const handleEditClick = (employeeId) => {
+        setEditingEmployeeId(employeeId);
+        const employee = employees.find((employee) => employee.employeeId === employeeId);
+        if (employee) {
+            setEditedEmployeeDetails(employee);
         }
-        if (validationError) {
-            setError(validationError);
+    };
+    const handleSaveClick = async (employeeId) => {
+        if (editedEmployeeDetails.age < 0) {
+            alert('Age must be a positive number.');
             return;
-        } else {
+        } else if (editedEmployeeDetails.age < 18 || editedEmployeeDetails.age > 60) {
+            alert('Age must be between 18 and 60.');
+            return;
+        } else if (editedEmployeeDetails.salary < 0) {
+            alert('Salary must be a positive number.');
+            return;
+        } else if (editedEmployeeDetails.salary < 100 || editedEmployeeDetails.salary > 100000) {
+            alert('Salary must be between 100 and 100000.');
+            return;
+        }
+        else {
             setError('');
         }
-        setEmployees((prevEmployees) =>
-            prevEmployees.map((employee) =>
-                employee.employeeId === employeeId ? { ...employee, [name]: value } : employee
-            )
-        );
-        const updatedEmployee = employees.find(employee => employee.employeeId === employeeId);
-        if (updatedEmployee) {
-            const updatedEmployeeDetails = { ...updatedEmployee, [name]: value };
-            try {
-                await axios.put(`http://localhost:8080/api/employees/${employeeId}`, updatedEmployeeDetails);
-            } catch (error) {
-                console.error('There was an error updating the employee!', error);
-            }
+
+        try {
+            await axios.put(`http://localhost:8080/api/employees/${employeeId}`, editedEmployeeDetails);
+            setEmployees((prevEmployees) => prevEmployees.map((employee) =>
+                employee.employeeId === employeeId ? { ...employee, ...editedEmployeeDetails } : employee
+            ));
+            setEditingEmployeeId(null);
+            setEditedEmployeeDetails({});
+        } catch (error) {
+            console.error('There was an error updating the employee!', error);
         }
+    };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditedEmployeeDetails((prevDetails) => ({
+            ...prevDetails,
+            [name]: value
+        }));
     };
     const handleDeleteEmployee = (employeeId) => {
         setDeleteDialogMessage('Are you sure you want to delete this employee?');
@@ -87,7 +89,7 @@ const EmployeeDetails = () => {
             }
         }
     };
-    
+
     return (
         <div className="employee-details-container">
             <h2>Employee Details</h2>
@@ -101,10 +103,10 @@ const EmployeeDetails = () => {
                             <th>Name</th>
                             <th>Gender</th>
                             <th>Aadhar Number</th>
+                            <th>Phone Number</th>
                             <th>Email Address</th>
                             <th>Age</th>
                             <th>Salary</th>
-                            <th>Phone Number</th>
                             <th>Department</th>
                             <th>Delete</th>
                         </tr>
@@ -115,46 +117,56 @@ const EmployeeDetails = () => {
                                 <td>{employee.name}</td>
                                 <td>{employee.gender}</td>
                                 <td>{employee.aadharNumber}</td>
+                                <td>{employee.phoneNumber}</td>
                                 <td>{employee.emailAddress}</td>
                                 <td>
-                                    <input
-                                        type="number"
-                                        name="age"
-                                        className='smaller-box'
-                                        value={employee.age}
-                                        onChange={(e) => handleInputChange(e, employee.employeeId)}
-                                    />
+                                    {editingEmployeeId === employee.employeeId ? (
+                                        <input
+                                            type="number"
+                                            name="age"
+                                            min={18} max={60}
+                                            className='age-smaller-box'
+                                            value={editedEmployeeDetails.age}
+                                            onChange={handleInputChange}
+                                        />) : (
+                                        employee.age
+                                    )}
                                 </td>
                                 <td>
-                                    <input
-                                        type="number"
-                                        name="salary"
-                                        className='smaller-box'
-                                        value={employee.salary}
-                                        onChange={(e) => handleInputChange(e, employee.employeeId)}
-                                    />
+                                    {editingEmployeeId === employee.employeeId ? (
+                                        <input
+                                            type="number"
+                                            name="salary"
+                                            className='more-smaller-box'
+                                            value={editedEmployeeDetails.salary}
+                                            onChange={handleInputChange}
+                                        />) : (
+                                        employee.salary
+                                    )}
                                 </td>
                                 <td>
-                                    <input
-                                        type="text"
-                                        name="phoneNumber"
-                                        value={employee.phoneNumber}
-                                        onChange={(e) => handleInputChange(e, employee.employeeId)}
-                                    />
+                                    {editingEmployeeId === employee.employeeId ? (
+                                        <select
+                                            name="department"
+                                            value={editedEmployeeDetails.department}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="House Keeping">House Keeping</option>
+                                            <option value="Reception">Reception</option>
+                                            <option value="Management">Management</option>
+                                            <option value="Food Service">Food Service</option>
+                                        </select>) : (
+                                        employee.department
+                                    )}
                                 </td>
                                 <td>
-                                    <select
-                                        name="department"
-                                        value={employee.department}
-                                        onChange={(e) => handleInputChange(e, employee.employeeId)}
-                                    >
-                                        <option value="House Keeping">House Keeping</option>
-                                        <option value="Reception">Reception</option>
-                                        <option value="Management">Management</option>
-                                        <option value="Food Service">Food Service</option>
-                                    </select>
-                                </td>
-                                <td>
+                                    {editingEmployeeId === employee.employeeId ? (
+                                        <button onClick={() => handleSaveClick(employee.employeeId)} className='save-button'>Save</button>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => handleEditClick(employee.employeeId)} className='edit-button'>Edit</button>
+                                        </>
+                                    )}
                                     <button onClick={() => handleDeleteEmployee(employee.employeeId)}>Delete</button>
                                 </td>
                             </tr>

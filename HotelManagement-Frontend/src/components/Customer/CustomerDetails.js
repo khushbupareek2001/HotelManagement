@@ -26,9 +26,10 @@ const CustomerDetails = () => {
         const fetchAvailableRooms = async () => {
             try {
                 console.log('Fetching available rooms...');
-                const response = await axios.get('http://localhost:8080/api/customers/available-rooms');
+                const response = await axios.get('http://localhost:8080/api/rooms');
+                const sortedRooms = response.data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
                 console.log('Available rooms fetched:', response.data);
-                setAvailableRooms(response.data);
+                setAvailableRooms(sortedRooms);
             } catch (error) {
                 console.error('There was an error fetching the available rooms!', error);
             }
@@ -45,10 +46,14 @@ const CustomerDetails = () => {
             const customerResponse = await axios.get('http://localhost:8080/api/customers');
             const sortedCustomers = customerResponse.data.sort((a, b) => b.id - a.id);
             setCustomers(sortedCustomers);
-            const roomResponse = await axios.get('http://localhost:8080/api/customers/available-rooms');
-            setAvailableRooms(roomResponse.data);
+            const roomResponse = await axios.get('http://localhost:8080/api/rooms');
+            const sortedRooms = roomResponse.data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
+            setAvailableRooms(sortedRooms);
         } catch (error) {
-            console.error('There was an error updating the room!', error);
+            if (error.response && error.response.data && error.response.data.message)
+                alert(error.response.data.message);
+            else
+                console.error('There was an error updating the room!', error);
         }
     };
     const handleCheckout = (customerId) => {
@@ -60,7 +65,7 @@ const CustomerDetails = () => {
     if (loading) {
         return <div>Loading...</div>;
     }
-    
+
     return (
         <div className="employee-details-container">
             <h2>Guest Details</h2>
@@ -87,31 +92,36 @@ const CustomerDetails = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredCustomers.map((customer) => (
-                            <tr key={customer.id}>
-                                <td>{customer.name}</td>
-                                <td>{customer.gender}</td>
-                                <td>
-                                    <select
-                                        value={customer.allocatedRoomNumber}
-                                        onChange={(e) => handleRoomChange(customer.id, e.target.value)}
-                                    >
-                                        <option value={customer.allocatedRoomNumber}>{customer.allocatedRoomNumber}</option>
-                                        {availableRooms.map((room) => (
-                                            <option key={room.roomId} value={room.roomNumber}>
-                                                {room.roomNumber}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </td>
-                                <td>{customer.checkInTime}</td>
-                                <td>{customer.checkOutTime}</td>
-                                <td>{customer.pendingBalance}</td>
-                                <td>
-                                    <button onClick={() => handleCheckout(customer.id)}>Checkout</button>
-                                </td>
-                            </tr>
-                        ))}
+                        {filteredCustomers.map((customer) => {
+                            const availableRoomOptions = availableRooms.filter(
+                                room => room.roomNumber !== customer.allocatedRoomNumber
+                            );
+                            return (
+                                <tr key={customer.id}>
+                                    <td>{customer.name}</td>
+                                    <td>{customer.gender}</td>
+                                    <td>
+                                        <select
+                                            value={customer.allocatedRoomNumber}
+                                            onChange={(e) => handleRoomChange(customer.id, e.target.value)}
+                                        >
+                                            <option value={customer.allocatedRoomNumber}>{customer.allocatedRoomNumber}</option>
+                                            {availableRoomOptions.map((room) => (
+                                                <option key={room.roomId} value={room.roomNumber}>
+                                                    {room.roomNumber}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                    <td>{customer.checkInTime}</td>
+                                    <td>{customer.checkOutTime}</td>
+                                    <td>{customer.pendingBalance}</td>
+                                    <td>
+                                        <button onClick={() => handleCheckout(customer.id)}>Checkout</button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             )}

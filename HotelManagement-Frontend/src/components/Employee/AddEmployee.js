@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Employee.css';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 const AddEmployee = () => {
     const navigate = useNavigate();
@@ -11,49 +13,63 @@ const AddEmployee = () => {
 
     const [name, setName] = useState('');
     const [age, setAge] = useState('18');
-    const [gender, setGender] = useState('MALE');
+    const [gender, setGender] = useState('');
     const [salary, setSalary] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [countryCode, setCountryCode] = useState('IN');
     const [aadharNumber, setAadharNumber] = useState('');
     const [emailAddress, setEmailAddress] = useState('');
     const [department, setDepartment] = useState('');
     const [errors, setErrors] = useState({});
+    const [valid, setValid] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const employee = {
-            name, age, gender, salary, phoneNumber, aadharNumber, emailAddress, department
-        };
-        try {
-            await axios.post('http://localhost:8080/api/employees', employee);
-            alert('Employee added successfully.');
-            navigateToMainScreen();
-        } catch (error) {
-            alert('Failed to add employee.');
+        let formValid = true;
+        let validationErrors = {};
+        if (!gender) {
+            validationErrors.gender = 'Please select gender';
+            formValid = false;
+        }
+        if (!phoneNumber) {
+            validationErrors.phoneNumber = 'Please enter phone number.';
+            formValid = false;
+        }
+        setErrors(validationErrors);
+        if (formValid) {
+            const employee = {
+                name, age, gender, salary, phoneNumber, aadharNumber, emailAddress, department
+            };
+            try {
+                await axios.post('http://localhost:8080/api/employees', employee);
+                alert('Employee added successfully.');
+                navigateToMainScreen();
+            } catch (error) {
+                alert('Failed to add employee.');
+            }
         }
     };
 
     const handleNameChange = (e) => {
         const value = e.target.value;
-        if (/^[A-Za-z\s]*$/.test(value) && value.length <= 30 && value.trimStart() === value) {
+        if (/^[A-Za-z\s]*$/.test(value) && value.trimStart() === value) {
             setName(value);
             setErrors(prev => ({ ...prev, name: '' }));
         } else {
-            setErrors(prev => ({ ...prev, name: 'Full name should contain only letters and be up to 30 characters.' }));
+            setErrors(prev => ({ ...prev, name: 'Full name should only contain letters.' }));
         }
     };
-    const handlePhoneNumberChange = (e) => {
-        const value = e.target.value.replace(/[^0-9]/g, '');
-        if (value === '' || /^[6-9]/.test(value)) {
-            setPhoneNumber(value);
-            setErrors(prev => ({ ...prev, phoneNumber: '' }));
-        } else {
-            setErrors(prev => ({ ...prev, phoneNumber: 'Phone number should be a valid number.' }));
-        }
-    };
+    const handleChange = (value) => {
+        setPhoneNumber(value);
+        setValid(validatePhoneNumber(value));
+    }
+    const validatePhoneNumber = (phoneNumber) => {
+        const phoneNumberPattern = /^d{10}$/;
+        return phoneNumberPattern.test(phoneNumber);
+    }
     const handleSalaryChange = (e) => {
         const value = e.target.value;
-        if (value > 0) {
+        if (value >= 0) {
             setSalary(value);
             setErrors(prev => ({ ...prev, salary: '' }));
         } else {
@@ -93,7 +109,7 @@ const AddEmployee = () => {
                             <div className='form-inside'>
                                 <label>
                                     Full Name:
-                                    <input type="text" value={name} onChange={handleNameChange} required />
+                                    <input type="text" value={name} maxLength={30} minLength={2} onChange={handleNameChange} required />
                                     {errors.name && <p className='error-text'>{errors.name}</p>}
                                 </label>
                                 <div className="input-group">
@@ -105,17 +121,25 @@ const AddEmployee = () => {
                                     <label>
                                         Gender:
                                         <div className='gender-options'>
-                                            <input type="radio" checked={gender === 'MALE'} value="MALE" onChange={(e) => setGender(e.target.value)} required /> Male
-                                            <input type="radio" checked={gender === 'FEMALE'} value="FEMALE" onChange={(e) => setGender(e.target.value)} required /> Female
-                                            <input type="radio" checked={gender === 'OTHER'} value="OTHER" onChange={(e) => setGender(e.target.value)} required /> Other
+                                            <input type="radio" checked={gender === 'MALE'} value="MALE" onChange={(e) => { setGender(e.target.value); setErrors(prev => ({ ...prev, gender: '' })); }} required /> Male
+                                            <input type="radio" checked={gender === 'FEMALE'} value="FEMALE" onChange={(e) => { setGender(e.target.value); setErrors(prev => ({ ...prev, gender: '' })); }} required /> Female
+                                            <input type="radio" checked={gender === 'OTHER'} value="OTHER" onChange={(e) => { setGender(e.target.value); setErrors(prev => ({ ...prev, gender: '' })); }} required /> Other
                                         </div>
+                                        {errors.gender && <p className='error-text'>{errors.gender}</p>}
                                     </label>
                                 </div>
                                 <label>
                                     Phone Number:
-                                    <input type="text" value={phoneNumber} maxLength={10} onChange={handlePhoneNumberChange} required />
-                                    {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
+                                    <PhoneInput
+                                        country='in'
+                                        value={phoneNumber}
+                                        onChange={handleChange}
+                                        inputProps={{
+                                            required: true,
+                                        }}
+                                    />
                                 </label>
+                                {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
                                 <label>
                                     Aadhar Number:
                                     <input type="text" value={aadharNumber} onChange={handleAadharChange} required />
@@ -129,7 +153,7 @@ const AddEmployee = () => {
                                 <div className="input-group">
                                     <label>
                                         Salary:
-                                        <input type="number" min={1} value={salary} onChange={handleSalaryChange} required />
+                                        <input type="number" min={100} max={100000} value={salary} onChange={handleSalaryChange} required />
                                         {errors.salary && <p className='error-text'>{errors.salary}</p>}
                                     </label>
                                     <label>
@@ -144,8 +168,6 @@ const AddEmployee = () => {
                                     </label>
                                 </div>
                             </div>
-
-
                         </fieldset>
                         <button type="submit">Save</button>
                     </form>

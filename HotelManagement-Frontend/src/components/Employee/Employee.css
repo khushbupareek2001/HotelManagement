@@ -20,6 +20,7 @@
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin-left: 2em;
+    min-width: 600px;
 }
 
 .form-card {
@@ -118,6 +119,16 @@ button:hover {
     opacity: 0.8;
 }
 
+.edit-button {
+    margin-right: 8px;
+}
+
+.save-button {
+    background-color: #c4cffb;
+    color: black;
+    margin-right: 8px;
+}
+
 .employee-details-container {
     width: 80%;
     margin: 0 auto;
@@ -153,6 +164,14 @@ button:hover {
 
 .smaller-box {
     width: 120px;
+}
+
+.age-smaller-box {
+    width: 50px;
+}
+
+.more-smaller-box {
+    width: 80px;
 }
 
 .no-employees {

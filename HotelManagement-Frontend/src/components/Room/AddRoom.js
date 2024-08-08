@@ -10,7 +10,7 @@ const AddRoom = () => {
     };
 
     const [roomNumber, setRoomNumber] = useState('');
-    const [availability, setAvailability] = useState('');
+    const [availability, setAvailability] = useState('AVAILABLE');
     const [cleaningStatus, setCleaningStatus] = useState('');
     const [price, setPrice] = useState('');
     const [bedType, setBedType] = useState('');
@@ -24,16 +24,19 @@ const AddRoom = () => {
             alert('Room added successfully');
             navigateToMainScreen();
         } catch (error) {
-            console.error('There was an error adding the room!', error);
+            if (error.response && error.response.data && error.response.data.message)
+                alert(error.response.data.message);
+            else
+                console.error('There was an error adding the room!', error);
         }
     };
     const handleRoomNumberChange = (e) => {
         const value = e.target.value;
-        if (/^[A-Za-z0-9\s]*$/.test(value) && value.length <= 10 && value.trimStart() === value) {
+        if (/^[A-Za-z0-9\s]*$/.test(value) && value.trimStart() === value) {
             setRoomNumber(value);
             setErrors(prev => ({ ...prev, roomNumber: '' }));
         } else {
-            setErrors(prev => ({ ...prev, roomNumber: 'Room number should not contain special characters and be up to 10 letters.' }));
+            setErrors(prev => ({ ...prev, roomNumber: 'Room number should not contain special characters.' }));
         }
     };
     const handlePriceChange = (e) => {
@@ -60,43 +63,31 @@ const AddRoom = () => {
                                     <input
                                         type="text"
                                         value={roomNumber}
+                                        maxLength={10}
                                         onChange={handleRoomNumberChange}
                                         required
                                     />
                                     {errors.roomNumber && <p className='error-text'>{errors.roomNumber}</p>}
                                 </label>
-                                <div className="input-group">
-                                    <label>
-                                        Availability:
-                                        <select
-                                            value={availability}
-                                            onChange={(e) => setAvailability(e.target.value)}
-                                            required
-                                        >
-                                            <option value="">Select</option>
-                                            <option value="AVAILABLE">Available</option>
-                                            <option value="OCCUPIED">Occupied</option>
-                                        </select>
-                                    </label>
-                                    <label>
-                                        Cleaning Status:
-                                        <select
-                                            value={cleaningStatus}
-                                            onChange={(e) => setCleaningStatus(e.target.value)}
-                                            required
-                                        >
-                                            <option value="">Select</option>
-                                            <option value="CLEANED">Cleaned</option>
-                                            <option value="DIRTY">Dirty</option>
-                                        </select>
-                                    </label>
-                                </div>
+                                <label>
+                                    Cleaning Status:
+                                    <select
+                                        value={cleaningStatus}
+                                        onChange={(e) => setCleaningStatus(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">Select</option>
+                                        <option value="CLEANED">Cleaned</option>
+                                        <option value="DIRTY">Dirty</option>
+                                    </select>
+                                </label>
                                 <label>
                                     Price:
                                     <input
                                         type="number"
                                         value={price}
-                                        min={1}
+                                        min={100}
+                                        max={50000}
                                         onChange={handlePriceChange}
                                         required
                                     />

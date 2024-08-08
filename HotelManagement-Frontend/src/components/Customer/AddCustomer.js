@@ -33,8 +33,8 @@ const AddCustomer = () => {
     useEffect(() => {
         const fetchAvailableRooms = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/customers/available-rooms');
-                const sortedRooms = response.data.sort((a, b) => a.roomNumber - b.roomNumber);
+                const response = await axios.get('http://localhost:8080/api/rooms');
+                const sortedRooms = response.data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
                 setAvailableRooms(sortedRooms);
             } catch (error) {
                 console.error('There was an error fetching the available rooms!', error);
@@ -94,19 +94,21 @@ const AddCustomer = () => {
                 alert('Customer added successfully');
                 navigateToMainScreen();
             } catch (error) {
-                console.error('There was an error adding the customer!', error);
-                alert('Failed to add customer');
+                if (error.response && error.response.data && error.response.data.message)
+                    alert(error.response.data.message);
+                else
+                    alert('Failed to add customer');
             }
         }
     };
 
     const handleNameChange = (e) => {
         const value = e.target.value;
-        if (/^[A-Za-z\s]*$/.test(value) && value.length <= 30 && value.trimStart() === value) {
+        if (/^[A-Za-z\s]*$/.test(value) && value.trimStart() === value) {
             setName(value);
             setErrors(prev => ({ ...prev, name: '' }));
         } else {
-            setErrors(prev => ({ ...prev, name: 'Full name should contain only letters and be up to 30 characters.' }));
+            setErrors(prev => ({ ...prev, name: 'Full name should only contain letters.' }));
         }
     };
     const handleIdNumberChange = (e) => {
@@ -178,6 +180,8 @@ const AddCustomer = () => {
                                         <input
                                             type="text"
                                             value={name}
+                                            maxLength={30}
+                                            minLength={2}
                                             onChange={handleNameChange}
                                             required
                                         />
@@ -203,20 +207,20 @@ const AddCustomer = () => {
                                                     type="radio"
                                                     value="MALE"
                                                     checked={gender === 'MALE'}
-                                                    onChange={(e) => setGender(e.target.value)}
+                                                    onChange={(e) => { setGender(e.target.value); setErrors(prev => ({ ...prev, gender: '' })); }}
                                                     required
                                                 /> Male
                                                 <input
                                                     type="radio"
                                                     value="FEMALE"
                                                     checked={gender === 'FEMALE'}
-                                                    onChange={(e) => setGender(e.target.value)}
+                                                    onChange={(e) => { setGender(e.target.value); setErrors(prev => ({ ...prev, gender: '' })); }}
                                                     required
                                                 /> Female
                                                 <input type="radio"
                                                     value="OTHER"
                                                     checked={gender === 'OTHER'}
-                                                    onChange={(e) => setGender(e.target.value)}
+                                                    onChange={(e) => { setGender(e.target.value); setErrors(prev => ({ ...prev, gender: '' })); }}
                                                     required
                                                 /> Other</div>
                                             {errors.gender && <p className='error-text'>{errors.gender}</p>}
@@ -255,7 +259,6 @@ const AddCustomer = () => {
                                             {errors.idNumber && <p className='error-text'>{errors.idNumber}</p>}
                                         </label>
                                     </div>
-
                                     <div className="input-group">
                                         <label className='fixed-width'>
                                             Room Number:
