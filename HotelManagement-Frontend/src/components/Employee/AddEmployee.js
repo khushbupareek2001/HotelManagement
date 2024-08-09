@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Employee.css';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
 
 const AddEmployee = () => {
     const navigate = useNavigate();
@@ -16,12 +14,10 @@ const AddEmployee = () => {
     const [gender, setGender] = useState('');
     const [salary, setSalary] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [countryCode, setCountryCode] = useState('IN');
     const [aadharNumber, setAadharNumber] = useState('');
     const [emailAddress, setEmailAddress] = useState('');
     const [department, setDepartment] = useState('');
     const [errors, setErrors] = useState({});
-    const [valid, setValid] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -31,8 +27,8 @@ const AddEmployee = () => {
             validationErrors.gender = 'Please select gender';
             formValid = false;
         }
-        if (!phoneNumber) {
-            validationErrors.phoneNumber = 'Please enter phone number.';
+        if (phoneNumber.length !== 10) {
+            validationErrors.phoneNumber = 'Phone number must be exactly 10 digits.';
             formValid = false;
         }
         setErrors(validationErrors);
@@ -59,14 +55,15 @@ const AddEmployee = () => {
             setErrors(prev => ({ ...prev, name: 'Full name should only contain letters.' }));
         }
     };
-    const handleChange = (value) => {
-        setPhoneNumber(value);
-        setValid(validatePhoneNumber(value));
-    }
-    const validatePhoneNumber = (phoneNumber) => {
-        const phoneNumberPattern = /^d{10}$/;
-        return phoneNumberPattern.test(phoneNumber);
-    }
+    const handlePhoneNumberChange = (e) => {
+        const value = e.target.value.replace(/[^0-9]/g, '');
+        if (value === '' || /^[6-9]/.test(value)) {
+            setPhoneNumber(value);
+            setErrors(prev => ({ ...prev, phoneNumber: '' }));
+        } else {
+            setErrors(prev => ({ ...prev, phoneNumber: 'Phone number should be a valid number.' }));
+        }
+    };
     const handleSalaryChange = (e) => {
         const value = e.target.value;
         if (value >= 0) {
@@ -130,16 +127,9 @@ const AddEmployee = () => {
                                 </div>
                                 <label>
                                     Phone Number:
-                                    <PhoneInput
-                                        country='in'
-                                        value={phoneNumber}
-                                        onChange={handleChange}
-                                        inputProps={{
-                                            required: true,
-                                        }}
-                                    />
+                                    <input type="text" value={phoneNumber} maxLength={10} onChange={handlePhoneNumberChange} required />
+                                    {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
                                 </label>
-                                {errors.phoneNumber && <p className='error-text'>{errors.phoneNumber}</p>}
                                 <label>
                                     Aadhar Number:
                                     <input type="text" value={aadharNumber} onChange={handleAadharChange} required />

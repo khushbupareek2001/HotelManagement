@@ -5,7 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString, getExampleNumber } from 'libphonenumber-js';
 
 const AddCustomer = () => {
     const navigate = useNavigate();
@@ -71,6 +71,11 @@ const AddCustomer = () => {
     useEffect(() => {
         setPendingBalance(totalAmount - advancePayment);
     }, [totalAmount, advancePayment]);
+    useEffect(() => {
+        if (phoneNumber) {
+            handlePhoneNumberChange(phoneNumber);
+        }
+    }, [countryCode]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -127,13 +132,19 @@ const AddCustomer = () => {
         setPhoneNumber(value);
         if (value) {
             const phoneNumberObj = parsePhoneNumberFromString(value);
-            if (phoneNumberObj && !phoneNumberObj.isPossible()) {
-                setErrors({ ...errors, phoneNumber: 'Invalid phone number for the selected country.' });
+            if (phoneNumberObj) {
+                const isValid = phoneNumberObj.isValid();
+                const countryCode = phoneNumberObj.country;
+                 if (!isValid) {
+                    setErrors({ ...errors, phoneNumber: 'Invalid phone number.' });
+                } else {
+                    setErrors({ ...errors, phoneNumber: '' });
+                }
             } else {
-                setErrors({ ...errors, phoneNumber: '' });
+                setErrors({ ...errors, phoneNumber: 'Invalid phone number.' });
             }
         }
-    };
+     }
     const handleCountryChange = (country) => {
         setCountryCode(country);
         setErrors((prev) => ({ ...prev, phoneNumber: '' }));
