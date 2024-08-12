@@ -1,4 +1,4 @@
-![Dashboard](https://github.com/user-attachments/assets/7f7c1738-7974-46e9-9f23-721d329845b1)
+![main screen](https://github.com/user-attachments/assets/bf6cf5e6-9c8f-4b6c-9462-2b95f74f9a60)
 ![Add Customer](https://github.com/user-attachments/assets/cd0e76a7-8c6d-4958-8f9f-12468060f3ee)
 ![Customer Details](https://github.com/user-attachments/assets/97650262-ba63-4227-a6de-7f881656d77d)
 ![Checkout Customer](https://github.com/user-attachments/assets/73140201-c2bb-4081-822f-bea62a2203b5)
