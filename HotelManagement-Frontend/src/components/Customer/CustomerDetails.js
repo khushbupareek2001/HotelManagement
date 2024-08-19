@@ -27,7 +27,7 @@ const CustomerDetails = () => {
             try {
                 console.log('Fetching available rooms...');
                 const response = await axios.get('http://localhost:8080/api/rooms');
-                const sortedRooms = response.data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
+                const sortedRooms = response.data.sort((a, b) => parseInt(a.roomNumber) - parseInt(b.roomNumber));
                 console.log('Available rooms fetched:', response.data);
                 setAvailableRooms(sortedRooms);
             } catch (error) {
@@ -47,7 +47,7 @@ const CustomerDetails = () => {
             const sortedCustomers = customerResponse.data.sort((a, b) => b.id - a.id);
             setCustomers(sortedCustomers);
             const roomResponse = await axios.get('http://localhost:8080/api/rooms');
-            const sortedRooms = roomResponse.data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
+            const sortedRooms = roomResponse.data.sort((a, b) => parseInt(a.roomNumber) - parseInt(b.roomNumber));
             setAvailableRooms(sortedRooms);
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message)

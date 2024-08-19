@@ -34,7 +34,7 @@ const AddCustomer = () => {
         const fetchAvailableRooms = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/api/rooms');
-                const sortedRooms = response.data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
+                const sortedRooms = response.data.sort((a, b) => parseInt(a.roomNumber) - parseInt(b.roomNumber));
                 setAvailableRooms(sortedRooms);
             } catch (error) {
                 console.error('There was an error fetching the available rooms!', error);
@@ -135,7 +135,7 @@ const AddCustomer = () => {
             if (phoneNumberObj) {
                 const isValid = phoneNumberObj.isValid();
                 const countryCode = phoneNumberObj.country;
-                 if (!isValid) {
+                if (!isValid) {
                     setErrors({ ...errors, phoneNumber: 'Invalid phone number.' });
                 } else {
                     setErrors({ ...errors, phoneNumber: '' });
@@ -144,7 +144,7 @@ const AddCustomer = () => {
                 setErrors({ ...errors, phoneNumber: 'Invalid phone number.' });
             }
         }
-     }
+    }
     const handleCountryChange = (country) => {
         setCountryCode(country);
         setErrors((prev) => ({ ...prev, phoneNumber: '' }));
@@ -270,48 +270,6 @@ const AddCustomer = () => {
                                             {errors.idNumber && <p className='error-text'>{errors.idNumber}</p>}
                                         </label>
                                     </div>
-                                    <div className="input-group">
-                                        <label className='fixed-width'>
-                                            Room Number:
-                                            <select
-                                                value={allocatedRoomNumber}
-                                                onChange={(e) => setAllocatedRoomNumber(e.target.value)}
-                                                required
-                                            >
-                                                <option value="">Select</option>
-
-                                                {availableRooms.length > 0 ? (
-                                                    availableRooms.map(room => (
-                                                        <option key={room.id} value={room.roomNumber}>{room.roomNumber}</option>
-                                                    ))
-                                                ) : (
-                                                    <option value="">No rooms available!!!</option>
-                                                )}
-                                            </select>
-                                        </label>
-                                        {allocatedRoomNumber && (
-                                            <>
-                                                <label>
-                                                    Bed Type:
-                                                    <input
-                                                        type="text"
-                                                        className='readonly-field'
-                                                        value={bedType}
-                                                        readOnly
-                                                    />
-                                                </label>
-                                                <label>
-                                                    Room Rate:
-                                                    <input
-                                                        type="number"
-                                                        className='readonly-field'
-                                                        value={price}
-                                                        readOnly
-                                                    />
-                                                </label>
-                                            </>
-                                        )}
-                                    </div>
                                     <div className='input-group'>
                                         <label>
                                             Check-In Date:
@@ -355,6 +313,48 @@ const AddCustomer = () => {
                                                 readOnly
                                             />
                                         </label>
+                                    </div>
+                                    <div className="input-group">
+                                        <label className='fixed-width'>
+                                            Room Number:
+                                            <select
+                                                value={allocatedRoomNumber}
+                                                onChange={(e) => setAllocatedRoomNumber(e.target.value)}
+                                                required
+                                            >
+                                                <option value="">Select</option>
+
+                                                {availableRooms.length > 0 ? (
+                                                    availableRooms.map(room => (
+                                                        <option key={room.id} value={room.roomNumber}>{room.roomNumber}</option>
+                                                    ))
+                                                ) : (
+                                                    <option value="">No rooms available!!!</option>
+                                                )}
+                                            </select>
+                                        </label>
+                                        {allocatedRoomNumber && (
+                                            <>
+                                                <label>
+                                                    Bed Type:
+                                                    <input
+                                                        type="text"
+                                                        className='readonly-field'
+                                                        value={bedType}
+                                                        readOnly
+                                                    />
+                                                </label>
+                                                <label>
+                                                    Room Rate:
+                                                    <input
+                                                        type="number"
+                                                        className='readonly-field'
+                                                        value={price}
+                                                        readOnly
+                                                    />
+                                                </label>
+                                            </>
+                                        )}
                                     </div>
                                     <label>
                                         Total Amount:

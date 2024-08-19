@@ -19,7 +19,7 @@ const RoomDetails = () => {
         const fetchRooms = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/api/rooms');
-                const sortedRooms = response.data.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
+                const sortedRooms = response.data.sort((a, b) => parseInt(a.roomNumber) - parseInt(b.roomNumber));
                 setRooms(sortedRooms);
             } catch (error) {
                 console.error('There was an error fetching the rooms!', error);

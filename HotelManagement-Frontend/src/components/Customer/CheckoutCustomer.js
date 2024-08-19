@@ -53,41 +53,41 @@ const CheckoutCustomer = () => {
                             <div className='form-inside'>
                                 <label>
                                     Full Name:
-                                    <input type="text" value={customer.name} readOnly />
+                                    <input type="text" className='readonly-field' value={customer.name} readOnly />
                                 </label>
                                 <div className="input-group">
                                     <label>
                                         ID Type:
-                                        <input type="text" value={customer.idType === "AADHAR_CARD" ? "AADHAR CARD" : customer.idType === "DRIVING_LICENSE" ? "DRIVING LICENSE" : "PASSPORT"} readOnly />
+                                        <input type="text" className='readonly-field' value={customer.idType === "AADHAR_CARD" ? "AADHAR CARD" : customer.idType === "DRIVING_LICENSE" ? "DRIVING LICENSE" : "PASSPORT"} readOnly />
                                     </label>
                                     <label>
                                         ID Number:
-                                        <input type="text" value={customer.idNumber} readOnly />
+                                        <input type="text" className='readonly-field' value={customer.idNumber} readOnly />
                                     </label>
                                 </div>
                                 <div className="input-group">
                                     <label>
                                         Phone Number:
                                         <input
-                                            type="text" value={customer.phoneNumber} readOnly />
+                                            type="text" className='readonly-field' value={customer.phoneNumber} readOnly />
                                     </label>
                                     <label>
                                         Gender:
-                                        <input type="text" value={customer.gender} readOnly />
+                                        <input type="text" className='readonly-field' value={customer.gender} readOnly />
                                     </label>
                                 </div>
                                 <div className="input-group">
                                     <label className='fixed-width'>
                                         Room Number:
-                                        <input type="text" value={customer.allocatedRoomNumber} readOnly />
+                                        <input type="text" className='readonly-field' value={customer.allocatedRoomNumber} readOnly />
                                     </label>
                                     <label>
                                         Bed Type:
-                                        <input type="text" value={customer.bedType} readOnly />
+                                        <input type="text" className='readonly-field' value={customer.bedType} readOnly />
                                     </label>
                                     <label>
                                         Room Rate:
-                                        <input type="number" value={customer.roomRate} readOnly />
+                                        <input type="number" className='readonly-field' value={customer.roomRate} readOnly />
                                     </label>
                                 </div>
                                 <div className='input-group'>
@@ -95,6 +95,7 @@ const CheckoutCustomer = () => {
                                         Check-In Date:
                                         <input
                                             type="text"
+                                            className='readonly-field'
                                             value={customer.checkInTime}
                                             readOnly
                                         />
@@ -103,6 +104,7 @@ const CheckoutCustomer = () => {
                                         Check-Out Date:
                                         <input
                                             type="text"
+                                            className='readonly-field'
                                             value={customer.checkOutTime}
                                             readOnly
                                         />
@@ -111,6 +113,7 @@ const CheckoutCustomer = () => {
                                         Number of Days:
                                         <input
                                             type="number"
+                                            className='readonly-field'
                                             value={customer.numberOfDays}
                                             readOnly
                                         />
@@ -120,11 +123,11 @@ const CheckoutCustomer = () => {
                                     <label>
                                         Total Amount:
                                         <input
-                                            type="number" value={customer.totalAmount} readOnly />
+                                            type="number" className='readonly-field' value={customer.totalAmount} readOnly />
                                     </label>
                                     <label>
                                         Advance Payment:
-                                        <input type="number" value={customer.advancePayment} readOnly />
+                                        <input type="number" className='readonly-field' value={customer.advancePayment} readOnly />
                                     </label>
                                     <label>
                                         Pending Balance:
